@@ -20,3 +20,4 @@ decisions as the project progresses.
 ## Build Log
 
 - Step 1: scaffolding, repo created.
+- Step 2: dependencies + typed config (pydantic-settings), pytest wired to src/ layout.
