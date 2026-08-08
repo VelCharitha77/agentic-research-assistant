@@ -25,3 +25,4 @@ decisions as the project progresses.
 - Step 4: LLM client abstraction (LLMClient interface, AnthropicLLMClient, FakeLLMClient) — nodes never touch the SDK directly.
 - Step 5: search tool abstraction (SearchTool interface, TavilySearchTool, FakeSearchTool, RetryingSearchTool decorator with exponential backoff).
 - Step 6: Research node (factory-injected SearchTool, fails cleanly to status="failed" when the retrying tool exhausts attempts — no duplicate retry logic at the graph level).
+- Step 7: Draft node (complete()) and Critique node (complete_structured() -> CritiqueResult) — both fully unit-tested against FakeLLMClient, zero API calls in the test suite.
