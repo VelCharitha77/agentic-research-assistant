@@ -22,3 +22,4 @@ decisions as the project progresses.
 - Step 1: scaffolding, repo created.
 - Step 2: dependencies + typed config (pydantic-settings), pytest wired to src/ layout.
 - Step 3: state schema (AgentState, CritiqueResult, Citation) as Pydantic models for runtime validation.
+- Step 4: LLM client abstraction (LLMClient interface, AnthropicLLMClient, FakeLLMClient) — nodes never touch the SDK directly.
