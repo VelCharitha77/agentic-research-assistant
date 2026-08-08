@@ -16,5 +16,20 @@ services:
       timeout: 3s
       retries: 10
 
+  api:
+    build: .
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      # Overrides the .env value: inside Docker's network, the DB is
+      # reachable by service name, not "localhost".
+      DATABASE_URL: postgresql://agent:agent@postgres:5432/agent_checkpoints
+    ports:
+      - "8001:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
 volumes:
   pgdata:
