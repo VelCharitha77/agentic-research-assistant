@@ -27,3 +27,4 @@ decisions as the project progresses.
 - Step 6: Research node (factory-injected SearchTool, fails cleanly to status="failed" when the retrying tool exhausts attempts — no duplicate retry logic at the graph level).
 - Step 7: Draft node (complete()) and Critique node (complete_structured() -> CritiqueResult) — both fully unit-tested against FakeLLMClient, zero API calls in the test suite.
 - Step 8: Revise node (increments revision_count), Finalize node (no factory needed, no external deps), and the two routing functions implementing the "approved? and iter<max?" decision logic from the architecture diagram.
+- Step 9 (fix): discovered LangGraph only guarantees output keys that were in the initial input or written by an executed node — untouched schema defaults (e.g. revision_count on the no-revision happy path) can silently vanish from invoke() results. Fixed by always seeding the full state via a new create_initial_state() helper instead of a partial dict.

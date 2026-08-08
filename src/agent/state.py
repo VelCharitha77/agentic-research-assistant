@@ -25,3 +25,12 @@ class AgentState(BaseModel):
     final_document: Optional[str] = None
     status: Literal["running", "completed", "failed"] = "running"
     error: Optional[str] = None
+
+
+def create_initial_state(run_id: str, topic: str) -> dict:
+    """The only correct way to build a graph's initial input: a full dict of
+    every field's default, not a partial dict of just what the caller cares
+    about. LangGraph only guarantees a key exists in the final result if it
+    was in the initial input or written by some node — untouched defaults
+    on a partial input can silently vanish from the output."""
+    return AgentState(run_id=run_id, topic=topic).model_dump()
