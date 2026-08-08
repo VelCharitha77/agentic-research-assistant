@@ -22,5 +22,6 @@ class AgentState(BaseModel):
     draft: str = ""
     critique: Optional[CritiqueResult] = None
     revision_count: int = 0
+    final_document: Optional[str] = None
     status: Literal["running", "completed", "failed"] = "running"
     error: Optional[str] = None

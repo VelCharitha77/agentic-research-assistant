@@ -26,3 +26,4 @@ decisions as the project progresses.
 - Step 5: search tool abstraction (SearchTool interface, TavilySearchTool, FakeSearchTool, RetryingSearchTool decorator with exponential backoff).
 - Step 6: Research node (factory-injected SearchTool, fails cleanly to status="failed" when the retrying tool exhausts attempts — no duplicate retry logic at the graph level).
 - Step 7: Draft node (complete()) and Critique node (complete_structured() -> CritiqueResult) — both fully unit-tested against FakeLLMClient, zero API calls in the test suite.
+- Step 8: Revise node (increments revision_count), Finalize node (no factory needed, no external deps), and the two routing functions implementing the "approved? and iter<max?" decision logic from the architecture diagram.
