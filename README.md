@@ -24,3 +24,4 @@ decisions as the project progresses.
 - Step 3: state schema (AgentState, CritiqueResult, Citation) as Pydantic models for runtime validation.
 - Step 4: LLM client abstraction (LLMClient interface, AnthropicLLMClient, FakeLLMClient) — nodes never touch the SDK directly.
 - Step 5: search tool abstraction (SearchTool interface, TavilySearchTool, FakeSearchTool, RetryingSearchTool decorator with exponential backoff).
+- Step 6: Research node (factory-injected SearchTool, fails cleanly to status="failed" when the retrying tool exhausts attempts — no duplicate retry logic at the graph level).
