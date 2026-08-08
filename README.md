@@ -31,3 +31,4 @@ decisions as the project progresses.
 - Step 10: Postgres-backed checkpointer (local via docker-compose) + a test that proves crash-recovery actually works — kills the run mid-Draft, restarts with a fresh process, and confirms Research does not re-execute.
 - Verified live end-to-end: real Tavily search + real Claude calls, self-critique triggered exactly one revision cycle before passing, final document correctly assembled with sources.
 - Made the OpenAI SDK import lazy (scoped to OpenAILLMClient.__init__) so it's architecturally optional, matching the pattern already used for Tavily — Anthropic remains the default and only provider actually exercised at runtime.
+- Step 13: structured JSON logging (run_id-correlated, wrapped once around all nodes rather than scattered per-node), input validation on the topic field (min/max length), and a prompt-injection guardrail clause added to every node that consumes untrusted research content.

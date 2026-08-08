@@ -1,6 +1,7 @@
 from langgraph.graph import END, START, StateGraph
 
 from agent.llm_client import LLMClient
+from agent.logging_config import with_logging
 from agent.nodes.critique import make_critique_node
 from agent.nodes.draft import make_draft_node
 from agent.nodes.finalize import finalize_node
@@ -12,7 +13,6 @@ from agent.tools.search import SearchTool
 
 
 def _failed_node(state: AgentState) -> dict:
-    # Terminal no-op: status/error were already set by the research node.
     return {}
 
 
@@ -24,12 +24,12 @@ def build_graph(
 ):
     graph = StateGraph(AgentState)
 
-    graph.add_node("research", make_research_node(search_tool))
-    graph.add_node("draft", make_draft_node(llm_client))
-    graph.add_node("critique", make_critique_node(llm_client))
-    graph.add_node("revise", make_revise_node(llm_client))
-    graph.add_node("finalize", finalize_node)
-    graph.add_node("failed", _failed_node)
+    graph.add_node("research", with_logging("research", make_research_node(search_tool)))
+    graph.add_node("draft", with_logging("draft", make_draft_node(llm_client)))
+    graph.add_node("critique", with_logging("critique", make_critique_node(llm_client)))
+    graph.add_node("revise", with_logging("revise", make_revise_node(llm_client)))
+    graph.add_node("finalize", with_logging("finalize", finalize_node))
+    graph.add_node("failed", with_logging("failed", _failed_node))
 
     graph.add_edge(START, "research")
     graph.add_conditional_edges(

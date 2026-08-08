@@ -69,3 +69,25 @@ def test_full_flow_create_then_poll_until_completed():
     final = client.get(f"/runs/{run_id}").json()
     assert "Draft v1" in final["final_document"]
     app.dependency_overrides.clear()
+
+
+def test_create_run_rejects_empty_topic():
+    graph = _build_test_graph([], [])
+    app.dependency_overrides[get_graph] = lambda: graph
+    client = TestClient(app)
+
+    response = client.post("/runs", json={"topic": ""})
+
+    assert response.status_code == 422
+    app.dependency_overrides.clear()
+
+
+def test_create_run_rejects_overly_long_topic():
+    graph = _build_test_graph([], [])
+    app.dependency_overrides[get_graph] = lambda: graph
+    client = TestClient(app)
+
+    response = client.post("/runs", json={"topic": "x" * 500})
+
+    assert response.status_code == 422
+    app.dependency_overrides.clear()

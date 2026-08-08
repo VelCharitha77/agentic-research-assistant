@@ -5,18 +5,20 @@ from contextlib import asynccontextmanager
 
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse, StreamingResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from agent.checkpointer import get_checkpointer
+from agent.config import settings
 from agent.events import broadcaster
 from agent.graph import build_graph
 from agent.llm_client import get_llm_client
+from agent.logging_config import configure_logging
 from agent.state import create_initial_state
 from agent.tools.search import RetryingSearchTool, TavilySearchTool
 
 
 class CreateRunRequest(BaseModel):
-    topic: str
+    topic: str = Field(min_length=3, max_length=300)
 
 
 class CreateRunResponse(BaseModel):
@@ -25,6 +27,7 @@ class CreateRunResponse(BaseModel):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    configure_logging(settings.log_level)
     with get_checkpointer() as checkpointer:
         llm_client = get_llm_client()
         search_tool = RetryingSearchTool(TavilySearchTool())
@@ -80,8 +83,6 @@ async def stream_run(run_id: str, graph=Depends(get_graph)):
     config = {"configurable": {"thread_id": run_id}}
     snapshot = graph.get_state(config)
 
-    # If the run already finished before the client connected, there's no
-    # live queue to subscribe to — reply immediately instead of hanging.
     if snapshot.values and snapshot.values.get("status") in ("completed", "failed"):
 
         async def already_done():
@@ -94,7 +95,7 @@ async def stream_run(run_id: str, graph=Depends(get_graph)):
 
     async def event_generator():
         while True:
-            event = await asyncio.to_thread(q.get)  # blocking get, off the event loop
+            event = await asyncio.to_thread(q.get)
             if event is None:
                 yield "event: done\ndata: {}\n\n"
                 break
