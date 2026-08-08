@@ -58,6 +58,40 @@ class AnthropicLLMClient(LLMClient):
         raise RuntimeError("Model did not return a tool_use block")
 
 
+class OpenAILLMClient(LLMClient):
+    def __init__(self, model: str | None = None, max_tokens: int = 2048):
+        import openai  # lazy: only needed if this provider is actually selected
+
+        self._client = openai.OpenAI(api_key=settings.openai_api_key)
+        self._model = model or settings.openai_model
+        self._max_tokens = max_tokens
+
+    def complete(self, system: str, prompt: str) -> str:
+        response = self._client.chat.completions.create(
+            model=self._model,
+            max_tokens=self._max_tokens,
+            messages=[
+                {"role": "system", "content": system},
+                {"role": "user", "content": prompt},
+            ],
+        )
+        return response.choices[0].message.content or ""
+
+    def complete_structured(self, system: str, prompt: str, schema: type[T]) -> T:
+        completion = self._client.beta.chat.completions.parse(
+            model=self._model,
+            messages=[
+                {"role": "system", "content": system},
+                {"role": "user", "content": prompt},
+            ],
+            response_format=schema,
+        )
+        parsed = completion.choices[0].message.parsed
+        if parsed is None:
+            raise RuntimeError("OpenAI did not return a parsed structured response")
+        return parsed
+
+
 class FakeLLMClient(LLMClient):
     """Test double: returns pre-queued responses instead of calling any API."""
 
@@ -80,3 +114,11 @@ class FakeLLMClient(LLMClient):
         if not isinstance(result, schema):
             raise TypeError(f"Queued response {result!r} is not an instance of {schema}")
         return result
+
+
+def get_llm_client() -> LLMClient:
+    if settings.llm_provider == "openai":
+        return OpenAILLMClient()
+    if settings.llm_provider == "anthropic":
+        return AnthropicLLMClient()
+    raise ValueError(f"Unknown llm_provider: {settings.llm_provider!r}")
